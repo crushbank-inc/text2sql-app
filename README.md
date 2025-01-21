@@ -51,7 +51,6 @@ To install this project locally, follow these steps:
 1. **Start the project:**
 
     ```bash
-    python prereqs.py # This only needs to be run once
     python app.py
     ```
 
@@ -95,35 +94,30 @@ After deploying the application, you can now test the API:
 
 3. Click the `Try it out` button and customize your request body:
     ```
-    {
-        "question": "Give me the Sales list of last 12 months?",
-        "dbtype": "MYSQL",
-        "llm_params": {
-            "model_id": "ibm/granite-3b-code-instruct",
-            "inputs": [],
-            "parameters": {
-                "decoding_method": "greedy",
-                "max_new_tokens": 500,
-                "min_new_tokens": 1,
-                "moderations": {
-                    "hap_input": "true",
-                    "hap_output": "true",
-                    "threshold": 0.75
-                },
-                "repetition_penalty": 1.1,
-                "temperature": 0.7,
-                "top_k": 50,
-                "top_p": 1
-            }
-        }
+{
+  "question": "How many tickets did Teldar Paper create?",
+	"dbtype": "PRESTO",
+  "llm_params": {
+    "model_id": "ibm/granite-13b-instruct-v2",
+    "parameters": {
+      "decoding_method": "greedy",
+      "max_new_tokens": 800,
+      "min_new_tokens": 1,
+      "moderations": {
+        "hap_input": "true",
+        "hap_output": "true",
+        "threshold": 0.75
+      }
     }
+  }
+}
     ```
 
     At a minimum, specify:
     ```
     {
       "question": "<your question>"
-      "dbtype": "MYSQL",
+      "dbtype": "PRESTO",
     }
     ```
     All other values have defaults or you can adjust the other parameters to improve your results.
@@ -137,7 +131,7 @@ curl --location '<application url>/texttoxql' \
 --header 'RAG-APP-API-Key: <your custom RAG-APP-API-KEY value>' \
 --data '{
   "question": "string"
-  "dbtype": "MYSQL",
+  "dbtype": "PRESTO",
 }'
 ```
 ### Postman
