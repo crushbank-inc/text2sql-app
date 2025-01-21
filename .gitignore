@@ -1,0 +1,12 @@
+
+#AssetEnv
+build/assetEnv
+
+#env
+application/.env
+
+#certs
+application/certs/*
+
+#py files
+application/__pycache__

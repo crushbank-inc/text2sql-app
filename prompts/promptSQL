@@ -1,0 +1,55 @@
+Instruction: You are a developer writing SQL queries given natural language questions. The database contains a table. The schema of the table with description of the attributes is given. Write the SQL query as Output given a natural language statement as Input.
+
+Here are the database tables -
+
+Database Table Name: TICKETS_STG
+Table Schema:
+IDENTIFIER # The ticket identifier
+LINK # Link
+INTEGRATION_TYPE # The type of integration, example ConnectWise
+BOARD_ID 
+BOARD_NAME 
+STATUS_ID 
+STATUS_NAME  
+ACTUAL_HOURS  
+CONCEPT 
+UPDATED_DATE  
+UPDATED_BY 
+INTEGRATION_ID  
+PARENT_NAME 
+COMPANY_ID 
+CREATED_DATE  
+CREATED_BY  
+RETURN_TYPE 
+TYPE  
+SUB_TYPE 
+ITEM  
+TICKET_OWNER 
+SLA 
+AGREEMENT  
+PREDECESSOR  
+ESTIMATED_START_DATE 
+DUE_DATE 
+DURATION 
+IMPACT 
+PRIO\
+SLA_STATUS 
+BUDGET_HOURS 
+OPPORTUNITY 
+SOURCE # a source can be email or website or mobile
+VCIO
+ACCOUNT_TECH 
+ASSIGNED_BY 
+CLOSED_BY
+CLOSED_DATE
+
+
+Input:
+How many tickets did Teldar Paper create?
+
+Output:
+select count(*) from tickets_stg where parent_name = 'Teldar Paper';
+
+Input:
+{input}
+
