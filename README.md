@@ -43,7 +43,20 @@ To install this project locally, follow these steps:
 
     Copy `env` to `.env` and fill in the variables with your url, passwords, and apikeys.
 
-    *Note*: `COS_IBM_CLOUD_API_KEY` and `IBM_CLOUD_API_KEY` are not the same key. 
+    # watsonx.ai variables
+    APP_API_KEY - Add a password that will be used to authorize the API
+    WX_PROJECT_ID - The watsonx.ai Project ID
+    WX_DEPLOYMENT_URL - The deployed prompt in watsonx.ai
+    -----------------------------------------------------------------------------
+    # watsonx.data variables
+    PRESTO_HOSTNAME - Presto Engine hostname.Example "na4.services.cloud.techzone.ibm.com"
+    PRESTO_PORT - Presto port number
+    PRESTO_USERNAME - watsonx.data username, example ibmlhadmin
+    PRESTO_PASSWORD - watsonx.data user password
+    PRESTO_CATALOG - watosnx.data catalog name, exmaple iceberg_data
+    PRESTO_SCHEMA - Iceberg schema name
+    PRESTO_TLS_LOCATION - presto certificate location, exmaple certs/presto.crt
+
 
 2. **Copy cert files:**
     Copy the presto.crt file to the application/certs directory.
