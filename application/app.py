@@ -8,6 +8,7 @@ import pymysql
 import prestodb
 import requests
 
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 #from utils import CloudObjectStorageReader, CustomWatsonX, create_sparse_vector_query_with_model, create_sparse_vector_query_with_model_and_filter
 from dotenv import load_dotenv
@@ -57,6 +58,11 @@ ibm_cloud_api_key = os.environ.get("IBM_CLOUD_API_KEY")
 project_id = os.environ.get("WX_PROJECT_ID")
 wx_deployment_url = os.environ.get("WX_DEPLOYMENT_URL")
 
+print("token")
+token_updated_at = None
+token = None
+headers = None
+
 def get_auth_token(api_key):
     auth_url = "https://iam.cloud.ibm.com/identity/token"
     
@@ -75,7 +81,19 @@ def get_auth_token(api_key):
         return response.json().get("access_token")
     else:
         raise Exception("Failed to get authentication token")
-    
+
+def update_token_if_needed(api_key):
+    global token, token_updated_at, headers
+    if token is None or datetime.now() - token_updated_at > timedelta(minutes=20):
+        print(f'updating token')
+        token =  get_auth_token(api_key)
+        token_updated_at = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+
 #iam_token = get_auth_token(os.getenv("IBM_CLOUD_API_KEY", None))
 
 # wxd creds
@@ -324,12 +342,10 @@ def watsonx(input, promptType, llm_params):
         GenParams.STOP_SEQUENCES: llm_params.parameters.stop_sequences,
         GenParams.TOP_K: llm_params.parameters.top_k,
     }
-    iam_token = get_auth_token(os.getenv("IBM_CLOUD_API_KEY", None))
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {iam_token}"
-    }
+    #iam_token = get_auth_token(os.getenv("IBM_CLOUD_API_KEY", None))
+    
+    update_token_if_needed(os.getenv("IBM_CLOUD_API_KEY", None))
+
     scoring_payload = {
                             "parameters": {
                                 "prompt_variables": {
