@@ -2,7 +2,7 @@ Instruction: You are a developer writing SQL queries given natural language ques
 
 Here are the database tables -
 
-Database Table Name: TICKETS_STG
+Database Table Name: TICKETS
 Table Schema:
 IDENTIFIER # The ticket identifier
 LINK # Link
@@ -43,13 +43,114 @@ ASSIGNED_BY
 CLOSED_BY
 CLOSED_DATE
 
+Database Table Name: TIME_ENTRIES
+Table Schema:
+IDENTIFIER # The ticket identifier
+USER
+HOURS
+DATE
+BILLABLE
+WORK_ROLE
+STATUS
+LOCATION
+BUSINESS_UNIT
+AGREEMENT
+AGREEMENT_TYPE
+INVOICE_NUMBER
+START_TIME
+END_TIME
+RETURN_TYPE
+
+Database Table Name: CONFIG
+Table Schema:
+IDENTIFIER # The config identifier
+LINK
+INTEGRATION_TYPE
+UPDATED_DATE
+UPDATED_BY
+INTEGRATION_ID
+PARENT_NAME
+COMPANY_ID
+CREATED_DATE
+CREATED_BY
+RETURN_TYPE
+BUSINESS_UNIT_ID
+BUSINESS_UNIT
+LOCATION_ID
+CONFIG_TYPE
+STATUS
+SLA
+INSTALL_DATE
+INSTALLED_BY
+PURCHASE_DATE
+LOCATION
+EXPIRATION_DATE
+VENDOR
+MANUFACTURER
+PART_NUMBER
+MODEL_NUMBER
+SERIAL_NUMBER
+TAG_NUMBER
+BILL_CUSTOMER
+NEEDS_RENEWAL
+CONTACT
+SITE
+SITE_ADDRESS
+NOTES
+VENDOR_NOTES
+
+Database Table Name: CONFIG_UDFS
+Table Schema:
+IDENTIFIER # The config identifier
+KEY
+VALUE
+RETURN_TYPE
+
+Database Table Name: CONTACTS
+Table Schema:
+ID
+TITLE
+LINK
+INTEGRATION_TYPE
+BUSINESS_UNIT_ID
+LOCATION_ID
+IDENTIFER
+UPDATED_DATE
+UPDATED_BY
+INTEGRATION_ID
+PARENT_NAME
+COMPANY_ID
+CREATED_DATE
+CREATED_BY
+RETURN_TYPE
+FULL_NAME
+COMPANY_LOCATION
+TITLE
+DEPARTMENT
+SITE
+EMAIL
+PHONE_NUMBER
+FACEBOOK
+TWITTER
+LINKEDIN
 
 Input:
 How many tickets did Teldar Paper create?
 
 Output:
-select count(*) from tickets_stg where parent_name = 'Teldar Paper';
+select count(*) from tickets where parent_name = 'Teldar Paper';
+
+Input:
+Who opened the most tickets this year?
+
+Output:
+SELECT created_by, COUNT(*) AS ticket_count FROM "iceberg_data"."cb_di"."tickets" WHERE year(created_date) = 2025 GROUP BY created_by ORDER BY ticket_count DESC LIMIT 1;
+
+Input:
+How many tickets did Teldar Paper create this year?
+
+Output:
+SELECT count(*) from iceberg_data.cb_di.tickets WHERE parent_name = 'Teldar Paper' and year(updated_date) = 2025;
 
 Input:
 {input}
-
