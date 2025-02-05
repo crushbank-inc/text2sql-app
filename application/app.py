@@ -57,6 +57,7 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 ibm_cloud_api_key = os.environ.get("IBM_CLOUD_API_KEY")
 project_id = os.environ.get("WX_PROJECT_ID")
 wx_deployment_url = os.environ.get("WX_DEPLOYMENT_URL")
+wx_json_deployment_url = os.environ.get("WX_JSON_DEPLOYMENT_URL")
 
 print("token")
 token_updated_at = None
@@ -160,7 +161,6 @@ presto_creds = {
     "tls_location": os.environ.get("PRESTO_TLS_LOCATION")
 }
 
-
 # Create a watsonx client cache for faster calls.
 custom_watsonx_cache = {}
 
@@ -206,22 +206,37 @@ async def texttosql(request: texttosqlRequest, api_key: str = Security(get_api_k
     nl_query = request.question
     dbtype = request.dbtype
     llm_params = request.llm_params
-    print("abount to run watsonx")
-    watsonxSQLResponse = watsonx (nl_query,"promptSQL", llm_params)
 
-    sql_query_from_watsonx = watsonxSQLResponse.replace('\n','').replace('Output:','').replace(';','')
-    #sql_query_from_watsonx = "select * from tickets_stg"
+    sql_payload = {"parameters": {"prompt_variables": {"input" : nl_query}}}
+    watsonxSQLResponse = watsonx (nl_query,wx_deployment_url, sql_payload)
+
+    response_from_watsonx = watsonxSQLResponse.replace('\n','').replace('Output:','').replace(';','')
+    split_string = response_from_watsonx.split(":")
+    query_type = split_string[0]
+    sql_query_from_watsonx = split_string[1]
+
     nlResponse = {}
     try:
       nlResponse['nl_question'] = nl_query
       nlResponse['sql_query'] = sql_query_from_watsonx
+      nlResponse['query_type'] = query_type
       output_json_dict = await queryexec(sql_query_from_watsonx, dbtype)
+      
+      
     except Exception as e:
       nlResponse['error'] = str(e)
     else:
-      nlResponse['result'] = "[" + output_json_dict.get("answer").replace("}{", "},{") + "]"
+      if query_type == "CONFIGUDF":
+        process_answer = "[" + output_json_dict.get("answer").replace("}{", "},{") + "]"
+        json_payload = {"parameters": {"prompt_variables": {"json" : process_answer,"input" : nl_query}}}
+         
+        answer = watsonxSQLResponse = watsonx (nl_query,wx_json_deployment_url, json_payload)
+        nlResponse['result'] = answer.replace('Output:','').replace(';','')
+      else:
+        nlResponse['result'] = "[" + output_json_dict.get("answer").replace("}{", "},{") + "]"
       # add logic to determine when to render, for now always pass along to Sequifi to render
       nlResponse['render'] = "True"
+
 
     return texttosqlResponse(response=nlResponse)
 
@@ -296,7 +311,6 @@ async def queryexec(query, dbtype):
     history=""
     image=""
     response = dict(answer=op,query=query,nl=nl,history=history,image=image)
-    print("Response from queryexec: "+ str(response))
     return response
 
 def get_latest_prompt_template(promptType):
@@ -332,7 +346,8 @@ def get_latest_prompt_template(promptType):
     return loaded_prompt_template_string
 
 #@app.post("/watsonx")
-def watsonx(input, promptType, llm_params):
+def watsonx(input, promptType, payload):
+    '''
     generate_params = {
         GenParams.MIN_NEW_TOKENS: llm_params.parameters.min_new_tokens,
         GenParams.MAX_NEW_TOKENS: llm_params.parameters.max_new_tokens,
@@ -342,19 +357,12 @@ def watsonx(input, promptType, llm_params):
         GenParams.STOP_SEQUENCES: llm_params.parameters.stop_sequences,
         GenParams.TOP_K: llm_params.parameters.top_k,
     }
+    '''
     #iam_token = get_auth_token(os.getenv("IBM_CLOUD_API_KEY", None))
     
     update_token_if_needed(os.getenv("IBM_CLOUD_API_KEY", None))
 
-    scoring_payload = {
-                            "parameters": {
-                                "prompt_variables": {
-                                    "input" : input
-                                }
-                            }
-                        }
-
-    response = requests.post(wx_deployment_url, headers=headers, json=scoring_payload, verify=False).json()
+    response = requests.post(promptType, headers=headers, json=payload, verify=False).json()
     print("RESPONSE : " + str(response))
     message = response['results'][0]['generated_text']
     print(" message: " + str(message))
