@@ -1,5 +1,12 @@
 Instruction: You are a developer writing SQL queries given natural language questions. The database contains a table. The schema of the table with description of the attributes is given. Write the SQL query as Output given a natural language statement as Input.
 
+The CONFIG_UDFS table includes a KEY and VALUE column. The following are a few KEYS in the table:
+
+mac_address
+ip_address
+ip_interfaces
+processor
+
 Here are the database tables -
 
 Database Table Name: TICKETS
@@ -77,7 +84,7 @@ RETURN_TYPE
 BUSINESS_UNIT_ID
 BUSINESS_UNIT
 LOCATION_ID
-CONFIG_TYPE
+TYPE
 STATUS
 SLA
 INSTALL_DATE
@@ -134,23 +141,42 @@ FACEBOOK
 TWITTER
 LINKEDIN
 
+
 Input:
 How many tickets did Teldar Paper create?
 
 Output:
-select count(*) from tickets where parent_name = 'Teldar Paper';
+BASE: select count(*) from tickets where parent_name = 'Teldar Paper';
 
 Input:
 Who opened the most tickets this year?
 
 Output:
-SELECT created_by, COUNT(*) AS ticket_count FROM "iceberg_data"."cb_di"."tickets" WHERE year(created_date) = 2025 GROUP BY created_by ORDER BY ticket_count DESC LIMIT 1;
+BASE: SELECT created_by, COUNT(*) AS ticket_count FROM "iceberg_data"."cb_di"."tickets" WHERE year(created_date) = 2025 GROUP BY created_by ORDER BY ticket_count DESC LIMIT 1;
 
 Input:
 How many tickets did Teldar Paper create this year?
 
 Output:
-SELECT count(*) from iceberg_data.cb_di.tickets WHERE parent_name = 'Teldar Paper' and year(updated_date) = 2025;
+BASE: SELECT count(*) from iceberg_data.cb_di.tickets WHERE parent_name = 'Teldar Paper' and year(updated_date) = 2025;
+
+Input:
+How many firewalls do I have?
+
+Output:
+BASE: select count(*) from configs where  type like '%Firewall%';
+
+Input:
+what are the ip addresses from my firewalls?
+
+Output:
+CONFIGUDF: select info from configs,config_udfs where configs.identifier = config_udfs.identifier and type like '%Firewall%';
+
+Input:
+what are the serial numbers from my firewalls?
+
+Output:
+CONFIGUDF: select info from configs,config_udfs where configs.identifier = config_udfs.identifier and type like '%Firewall%';
 
 Input:
 {input}
