@@ -1,12 +1,5 @@
 Instruction: You are a developer writing SQL queries given natural language questions. The database contains a table. The schema of the table with description of the attributes is given. Write the SQL query as Output given a natural language statement as Input.
 
-The CONFIG_UDFS table includes a KEY and VALUE column. The following are a few KEYS in the table:
-
-mac_address
-ip_address
-ip_interfaces
-processor
-
 Here are the database tables -
 
 Database Table Name: TICKETS
@@ -109,9 +102,8 @@ VENDOR_NOTES
 Database Table Name: CONFIG_UDFS
 Table Schema:
 IDENTIFIER # The config identifier
-KEY
-VALUE
 RETURN_TYPE
+INFO # Column names include: ip,domain_name_servers,operating_system,server_name,architecture
 
 Database Table Name: CONTACTS
 Table Schema:
@@ -142,41 +134,61 @@ TWITTER
 LINKEDIN
 
 
-Input:
-How many tickets did Teldar Paper create?
+Input: 
+How many tickets did Teldar Paper create? 
 
 Output:
-BASE: select count(*) from tickets where parent_name = 'Teldar Paper';
+BASE: select count(*) from tickets where parent_name = 'Teldar Paper'; 
 
 Input:
-Who opened the most tickets this year?
+Who opened the most tickets this year? 
 
 Output:
 BASE: SELECT created_by, COUNT(*) AS ticket_count FROM "iceberg_data"."cb_di"."tickets" WHERE year(created_date) = 2025 GROUP BY created_by ORDER BY ticket_count DESC LIMIT 1;
 
 Input:
-How many tickets did Teldar Paper create this year?
+How many tickets did Teldar Paper create this year? 
 
-Output:
-BASE: SELECT count(*) from iceberg_data.cb_di.tickets WHERE parent_name = 'Teldar Paper' and year(updated_date) = 2025;
-
-Input:
-How many firewalls do I have?
-
-Output:
-BASE: select count(*) from configs where  type like '%Firewall%';
+Output: 
+BASE: SELECT count(*) from iceberg_data.cb_di.tickets WHERE parent_name = 'Teldar Paper' and year(updated_date) = 2025; 
 
 Input:
-what are the ip addresses from my firewalls?
+How many firewalls do I have? Output: BASE: select count(*) from configs where type like '%Firewall%'; Input: what are the ip addresses from my firewalls? 
 
 Output:
-CONFIGUDF: select info from configs,config_udfs where configs.identifier = config_udfs.identifier and type like '%Firewall%';
+BASE: select json_extract_scalar(info,'ip_interfaces') as ip_interfaces from configs,config_udfs where configs.identifier = config_udfs.identifier;
 
 Input:
 what are the serial numbers from my firewalls?
 
 Output:
-CONFIGUDF: select info from configs,config_udfs where configs.identifier = config_udfs.identifier and type like '%Firewall%';
+BASE: select serial_number from configs where type like '%Firewall%';
+
+Input: 
+List all the clients on Windows 2016 Server?
+
+Output: 
+BASE: select parent_name from configs,config_udfs where configs.identifier = config_udfs.identifier and json_extract_scalar(info,'operating_system') like '%Windows%' and json_extract_scalar(info,'operating_system') like '%2016%';
+
+Input:
+How many Linux Web Servers does Promos and Goods have? 
+
+Output:
+BASE:select count(*) from configs,config_udfs where configs.identifier = config_udfs.identifier and json_extract_scalar(info,'operating_system') like '%Linux%' and parent_name = 'Promos and Goods' ; 
+
+Input:
+How many Windows 2016 servers does Pied Piper have?
+
+Output:
+BASE: select count(*) from configs,config_udfs where configs.identifier = config_udfs.identifier and configs.parent_name = 'Pied Piper' and json_extract_scalar(info,'operating_system') like '%Windows%' and json_extract_scalar(info,'operating_system') like '%2016%'
+
+Input:
+what server has ip address 192.168.101.92?
+
+Output:
+BASE: select json_extract_scalar(info,'server_name') from configs,config_udfs where configs.identifier = config_udfs.identifier and type like '%Server%' and json_extract_scalar(info,'ip') = '192.168.101.92';
 
 Input:
 {input}
+
+
